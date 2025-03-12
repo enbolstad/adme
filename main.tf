@@ -53,7 +53,7 @@ resource "azurerm_resource_group_template_deployment" "default" {
       }
     }
     "publicNetworkAccess" = {
-      value =false}
+      value =true}
     "privateEndpoints" = {
       value =[
                 {
