@@ -1,5 +1,5 @@
 resource "azurerm_resource_group" "default" {
-  name     = "rg1"
+  name     = var.rg_name
   location = var.location
 }
 
@@ -11,7 +11,7 @@ resource "azurerm_virtual_network" "adme" {
 }
 
 resource "azurerm_subnet" "adme" {
-    name                 = "subnet_adme"
+    name                 = var.adme_vnet_subnet_name
     resource_group_name  = azurerm_resource_group.default.name
     virtual_network_name = azurerm_virtual_network.adme.name
     address_prefixes     = ["10.0.1.0/24"]
@@ -141,7 +141,7 @@ resource "azurerm_resource_group_template_deployment" "default" {
 
 
 
-resource "azurerm_virtual_network" "appgw" {
+/* resource "azurerm_virtual_network" "appgw" {
   name                = "vn_appgw"
   resource_group_name = azurerm_resource_group.default.name
   location            = azurerm_resource_group.default.location
@@ -235,4 +235,4 @@ resource "azurerm_application_gateway" "network" {
     backend_address_pool_name  = local.backend_address_pool_name
     backend_http_settings_name = local.http_setting_name
   }
-}
+} */

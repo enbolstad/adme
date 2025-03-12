@@ -1,7 +1,7 @@
 variable "rg_name" {
     description = "The name of the resource group"
     type        = string
-    default     = "rg1"
+    default     = "rg3"
 }
 
 variable "subscription_id" {
@@ -14,7 +14,7 @@ variable "subscription_id" {
 variable "location" {
     description = "The location of the resource group"
     type        = string
-    default     = "westeurope"
+    default     = "northeurope"
   
 }
 
@@ -28,7 +28,7 @@ variable "authAppId" {
 variable "adme_name" {
     description = "The name of the adme instance"
     type        = string
-    default     = "adme-dev"
+    default     = "testdevtest"
   
 }
 
