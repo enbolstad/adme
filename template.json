@@ -1,0 +1,305 @@
+{
+    "$schema": "http://schema.management.azure.com/schemas/2014-04-01-preview/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "name": {
+            "type": "string"
+        },
+        "location": {
+            "type": "string"
+        },
+        "tagsByResource": {
+            "type": "object"
+        },
+        "authAppId": {
+            "type": "string"
+        },
+        "dataPartitionNames": {
+            "type": "array"
+        },
+        "cmkEnabled": {
+            "type": "bool"
+        },
+        "encryption": {
+            "type": "object"
+        },
+        "identity": {
+            "type": "object"
+        },
+        "corsRules": {
+            "type": "array"
+        },
+        "sku": {
+            "type": "object"
+        },
+        "publicNetworkAccess": {
+            "defaultValue": true,
+            "type": "bool"
+        },
+        "privateEndpoints": {
+            "type": "array",
+            "metadata": {
+                "description": "Private endpoints. Empty if no private network access selected."
+            }
+        },
+        "resourceGroupId": {
+            "type": "string"
+        }
+    },
+    "resources": [
+        {
+            "apiVersion": "2023-02-21-preview",
+            "name": "[parameters('name')]",
+            "location": "[parameters('location')]",
+            "identity": "[if(parameters('cmkEnabled'), parameters('identity'), json('null'))]",
+            "type": "Microsoft.OpenEnergyPlatform/energyServices",
+            "tags": "[ if(contains(parameters('tagsByResource'), 'Microsoft.OpenEnergyPlatform/energyServices'), parameters('tagsByResource')['Microsoft.OpenEnergyPlatform/energyServices'], json('{}')) ]",
+            "properties": {
+                "authAppId": "[parameters('authAppID')]",
+                "dataPartitionNames": "[parameters('dataPartitionNames')]",
+                "encryption": "[if(parameters('cmkEnabled'), parameters('encryption'), json('null'))]",
+                "publicNetworkAccess": "[if(bool(parameters('publicNetworkAccess')), 'Enabled', 'Disabled')]",
+                "corsRules": "[parameters('corsRules')]",
+                "sku": "[parameters('sku')]"
+            }
+        },
+        {
+            "apiVersion": "2017-05-10",
+            "name": "[concat('PrivateEndpoint-', parameters('privateEndpoints')[copyIndex()].privateEndpoint.name, '-', uniqueString(parameters('privateEndpoints')[copyIndex()].privateEndpoint.name)  )]",
+            "type": "Microsoft.Resources/deployments",
+            "resourceGroup": "[parameters('privateEndpoints')[copyIndex()].resourceGroup.value.name]",
+            "subscriptionId": "[parameters('privateEndpoints')[copyIndex()].subscription.subscriptionId]",
+            "dependsOn": [
+                "[parameters('name')]"
+            ],
+            "condition": "[not(parameters('publicNetworkAccess'))]",
+            "copy": {
+                "name": "privateendpointscopy",
+                "count": "[length(parameters('privateEndpoints'))]"
+            },
+            "properties": {
+                "mode": "Incremental",
+                "template": {
+                    "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+                    "contentVersion": "1.0.0.0",
+                    "resources": [
+                        {
+                            "location": "[parameters('privateEndpoints')[copyIndex()].privateEndpoint.location]",
+                            "name": "[parameters('privateEndpoints')[copyIndex()].privateEndpoint.name]",
+                            "type": "Microsoft.Network/privateEndpoints",
+                            "apiVersion": "2021-05-01",
+                            "properties": {
+                                "subnet": {
+                                    "id": "[parameters('privateEndpoints')[copyIndex()].privateEndpoint.properties.subnet.id]"
+                                },
+                                "privateLinkServiceConnections": [
+                                    {
+                                        "name": "[parameters('privateEndpoints')[copyIndex()].privateEndpoint.name]",
+                                        "properties": {
+                                            "privateLinkServiceId": "[concat(parameters('resourceGroupId'), '/providers/Microsoft.OpenEnergyPlatform/energyServices/', parameters('name'))]",
+                                            "groupIds": "[parameters('privateEndpoints')[copyIndex()].privateEndpoint.properties.privateLinkServiceConnections[0].properties.groupIds]"
+                                        }
+                                    }
+                                ]
+                            }
+                        }
+                    ]
+                }
+            }
+        },
+        {
+            "type": "Microsoft.Resources/deployments",
+            "apiVersion": "2017-05-10",
+            "name": "[concat('PrivateDNSZone','-', parameters('privateEndpoints')[copyIndex()].privateEndpoint.name,'-', uniqueString(parameters('privateEndpoints')[copyIndex()].privateEndpoint.name) ) ]",
+            "dependsOn": [
+                "[concat('Microsoft.Resources/deployments/',concat('PrivateEndpoint-', parameters('privateEndpoints')[copyIndex()].privateEndpoint.name, '-',uniqueString(parameters('privateEndpoints')[copyIndex()].privateEndpoint.name) ) )]"
+            ],
+            "copy": {
+                "name": "privateendpointscopy",
+                "count": "[length(parameters('privateEndpoints'))]"
+            },
+            "properties": {
+                "mode": "Incremental",
+                "template": {
+                    "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+                    "contentVersion": "1.0.0.0",
+                    "resources": [
+                        {
+                            "apiVersion": "2017-05-10",
+                            "name": "[concat('PrivateDNSZone','-', parameters('privateEndpoints')[copyIndex()].privateEndpoint.name,'-', uniqueString(parameters('privateEndpoints')[copyIndex()].privateEndpoint.name),'-meds' ) ]",
+                            "type": "Microsoft.Resources/deployments",
+                            "subscriptionId": "[parameters('privateEndpoints')[copyIndex()].subscription.subscriptionId]",
+                            "resourceGroup": "[parameters('privateEndpoints')[copyIndex()].resourceGroup.value.name]",
+                            "properties": {
+                                "mode": "Incremental",
+                                "template": {
+                                    "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+                                    "contentVersion": "1.0.0.0",
+                                    "resources": [
+                                        {
+                                            "type": "Microsoft.Network/privateDnsZones",
+                                            "apiVersion": "2018-09-01",
+                                            "name": "privatelink.energy.azure.com",
+                                            "location": "global",
+                                            "tags": {},
+                                            "properties": {}
+                                        }
+                                    ]
+                                }
+                            }
+                        },
+                        {
+                            "apiVersion": "2017-05-10",
+                            "name": "[concat('PrivateDNSZone','-', parameters('privateEndpoints')[copyIndex()].privateEndpoint.name,'-', uniqueString(parameters('privateEndpoints')[copyIndex()].privateEndpoint.name),'-storage' ) ]",
+                            "type": "Microsoft.Resources/deployments",
+                            "subscriptionId": "[parameters('privateEndpoints')[copyIndex()].subscription.subscriptionId]",
+                            "resourceGroup": "[parameters('privateEndpoints')[copyIndex()].resourceGroup.value.name]",
+                            "properties": {
+                                "mode": "Incremental",
+                                "template": {
+                                    "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+                                    "contentVersion": "1.0.0.0",
+                                    "resources": [
+                                        {
+                                            "type": "Microsoft.Network/privateDnsZones",
+                                            "apiVersion": "2018-09-01",
+                                            "name": "privatelink.blob.core.windows.net",
+                                            "location": "global",
+                                            "tags": {},
+                                            "properties": {}
+                                        }
+                                    ]
+                                }
+                            }
+                        }
+                    ]
+                }
+            }
+        },
+        {
+            "type": "Microsoft.Resources/deployments",
+            "apiVersion": "2017-05-10",
+            "name": "[concat('VirtualNetworkLink', '-', parameters('privateEndpoints')[copyIndex()].privateEndpoint.name,'-', uniqueString(parameters('privateEndpoints')[copyIndex()].privateEndpoint.name))]",
+            "dependsOn": [
+                "[concat('PrivateDNSZone','-', parameters('privateEndpoints')[copyIndex()].privateEndpoint.name,'-', uniqueString(parameters('privateEndpoints')[copyIndex()].privateEndpoint.name) ) ]",
+                "[concat('Microsoft.Resources/deployments/', concat('PrivateEndpoint-', parameters('privateEndpoints')[copyIndex()].privateEndpoint.name, '-',uniqueString(parameters('privateEndpoints')[copyIndex()].privateEndpoint.name) ) )]"
+            ],
+            "copy": {
+                "name": "privateendpointscopy",
+                "count": "[length(parameters('privateEndpoints'))]"
+            },
+            "properties": {
+                "mode": "Incremental",
+                "template": {
+                    "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+                    "contentVersion": "1.0.0.0",
+                    "resources": [
+                        {
+                            "apiVersion": "2017-05-10",
+                            "name": "VirtualNetworklinks1",
+                            "type": "Microsoft.Resources/deployments",
+                            "subscriptionId": "[parameters('privateEndpoints')[copyIndex()].subscription.subscriptionId]",
+                            "resourceGroup": "[parameters('privateEndpoints')[copyIndex()].resourceGroup.value.name]",
+                            "properties": {
+                                "mode": "Incremental",
+                                "template": {
+                                    "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+                                    "contentVersion": "1.0.0.0",
+                                    "resources": [
+                                        {
+                                            "type": "Microsoft.Network/privateDnsZones/virtualNetworkLinks",
+                                            "apiVersion": "2018-09-01",
+                                            "name": "[concat('privatelink.energy.azure.com', '/', uniqueString(parameters('privateEndpoints')[copyIndex()].privateEndpoint.name) )]",
+                                            "location": "global",
+                                            "properties": {
+                                                "virtualNetwork": {
+                                                    "id": "[substring(parameters('privateEndpoints')[copyIndex()].privateEndpoint.properties.subnet.id,0, sub(indexOf( parameters('privateEndpoints')[copyIndex()].privateEndpoint.properties.subnet.id, 'subnets/'), 1) ) ]"
+                                                },
+                                                "registrationEnabled": false
+                                            }
+                                        }
+                                    ]
+                                }
+                            }
+                        },
+                        {
+                            "apiVersion": "2017-05-10",
+                            "name": "VirtualNetworklinks2",
+                            "type": "Microsoft.Resources/deployments",
+                            "subscriptionId": "[parameters('privateEndpoints')[copyIndex()].subscription.subscriptionId]",
+                            "resourceGroup": "[parameters('privateEndpoints')[copyIndex()].resourceGroup.value.name]",
+                            "properties": {
+                                "mode": "Incremental",
+                                "template": {
+                                    "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+                                    "contentVersion": "1.0.0.0",
+                                    "resources": [
+                                        {
+                                            "type": "Microsoft.Network/privateDnsZones/virtualNetworkLinks",
+                                            "apiVersion": "2018-09-01",
+                                            "name": "[concat('privatelink.blob.core.windows.net', '/',uniqueString(uniqueString(parameters('privateEndpoints')[copyIndex()].privateEndpoint.name) ))]",
+                                            "location": "global",
+                                            "properties": {
+                                                "virtualNetwork": {
+                                                    "id": "[substring(parameters('privateEndpoints')[copyIndex()].privateEndpoint.properties.subnet.id, 0, sub(indexOf( parameters('privateEndpoints')[copyIndex()].privateEndpoint.properties.subnet.id, 'subnets/'), 1) ) ]"
+                                                },
+                                                "registrationEnabled": false
+                                            }
+                                        }
+                                    ]
+                                }
+                            }
+                        }
+                    ]
+                }
+            }
+        },
+        {
+            "apiVersion": "2017-05-10",
+            "name": "[concat('DnsZoneGroup-', parameters('privateEndpoints')[copyIndex()].privateEndpoint.name)]",
+            "type": "Microsoft.Resources/deployments",
+            "resourceGroup": "[parameters('privateEndpoints')[copyIndex()].resourceGroup.value.name]",
+            "subscriptionId": "[parameters('privateEndpoints')[copyIndex()].subscription.subscriptionId]",
+            "dependsOn": [
+                "[concat('Microsoft.Resources/deployments/', concat('PrivateEndpoint-', parameters('privateEndpoints')[copyIndex()].privateEndpoint.name, '-',uniqueString(parameters('privateEndpoints')[copyIndex()].privateEndpoint.name) ))]",
+                "[concat('PrivateDNSZone','-', parameters('privateEndpoints')[copyIndex()].privateEndpoint.name,'-', uniqueString(parameters('privateEndpoints')[copyIndex()].privateEndpoint.name) ) ]"
+            ],
+            "condition": "[not(parameters('publicNetworkAccess'))]",
+            "copy": {
+                "name": "privateendpointdnscopy",
+                "count": "[length(parameters('privateEndpoints'))]"
+            },
+            "properties": {
+                "mode": "Incremental",
+                "template": {
+                    "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+                    "contentVersion": "1.0.0.0",
+                    "resources": [
+                        {
+                            "type": "Microsoft.Network/privateEndpoints/privateDnsZoneGroups",
+                            "apiVersion": "2021-05-01",
+                            "name": "[concat(parameters('privateEndpoints')[copyIndex()].privateEndpoint.name, '/', 'default')]",
+                            "location": "[parameters('privateEndpoints')[copyIndex()].privateEndpoint.location]",
+                            "properties": {
+                                "privateDnsZoneConfigs": [
+                                    {
+                                        "name": "privatelink-energy-azure-com",
+                                        "properties": {
+                                            "privateDnsZoneId": "[concat( '/subscriptions/', parameters('privateEndpoints')[copyIndex()].subscription.subscriptionId, '/resourceGroups/', parameters('privateEndpoints')[copyIndex()].resourceGroup.value.name, '/providers/Microsoft.Network/privateDnsZones/privatelink.energy.azure.com')]"
+                                        }
+                                    },
+                                    {
+                                        "name": "privatelink-blob-core-windows-net",
+                                        "properties": {
+                                            "privateDnsZoneId": "[concat( '/subscriptions/' ,parameters('privateEndpoints')[copyIndex()].subscription.subscriptionId , '/resourceGroups/', parameters('privateEndpoints')[copyIndex()].resourceGroup.value.name, '/providers/Microsoft.Network/privateDnsZones/privatelink.blob.core.windows.net')]"
+                                        }
+                                    }
+                                ]
+                            }
+                        }
+                    ]
+                }
+            }
+        }
+    ]
+}
