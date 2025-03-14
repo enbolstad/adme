@@ -15,13 +15,15 @@ resource "azurerm_subnet" "adme" {
     resource_group_name  = azurerm_resource_group.default.name
     virtual_network_name = azurerm_virtual_network.adme.name
     address_prefixes     = ["10.0.1.0/24"]
-  
 }
 
 resource "azurerm_resource_group_template_deployment" "default" {
   name                = var.adme_name
   resource_group_name = azurerm_resource_group.default.name
   deployment_mode     = "Incremental"
+      depends_on = [
+    azurerm_subnet.adme
+  ]
   parameters_content = jsonencode({
     "name" = {
       value = "${var.adme_name}"}
@@ -62,10 +64,7 @@ resource "azurerm_resource_group_template_deployment" "default" {
                         "displayName": "${var.subscription_display_name}",
                         "state": "Enabled",
                         "subscriptionId": "${var.subscription_id}",
-                        "subscriptionPolicies": {
-                            "locationPlacementId": "Public_2014-09-01",
-                            "quotaId": "Sponsored_2016-01-01"
-                        },
+                        "subscriptionPolicies": {},
                         "tenantId": "${var.tenant_id}",
                         "promotions": [],
                         "uniqueDisplayName": "${var.subscription_display_name}"
@@ -73,22 +72,7 @@ resource "azurerm_resource_group_template_deployment" "default" {
                     "location": {
                         "id": "/subscriptions/${var.subscription_id}/locations/${var.location}",
                         "name": "${var.location}",
-                        "displayName": "North Europe",
-                        "regionalDisplayName": "(Europe) North Europe",
-                        "metadata": {
-                            "regionType": "Physical",
-                            "regionCategory": "Recommended",
-                            "geographyGroup": "Europe",
-                            "longitude": "-6.2597",
-                            "latitude": "53.3478",
-                            "physicalLocation": "Ireland",
-                            "pairedRegion": [
-                                {
-                                    "name": "westeurope",
-                                    "id": "/subscriptions/${var.subscription_id}/locations/westeurope"
-                                }
-                            ]
-                        }
+                        "metadata": {}
                     },
                     "resourceGroup": {
                         "mode": 0,
