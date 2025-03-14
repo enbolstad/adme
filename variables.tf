@@ -1,7 +1,7 @@
 variable "rg_name" {
   description = "The name of the resource group"
   type        = string
-  default     = "rg4"
+  default     = "rg5"
 }
 
 variable "subscription_id" {
@@ -28,7 +28,7 @@ variable "authAppId" {
 variable "adme_name" {
   description = "The name of the adme instance"
   type        = string
-  default     = "testdevtestgh"
+  default     = "testdevtestghh"
 
 }
 
@@ -49,7 +49,7 @@ variable "subscription_display_name" {
 variable "Private_Endpoints_name" {
   description = "The display name of the Private Endpoint"
   type        = string
-  default     = "PrivateEndpoint12"
+  default     = "PrivateEndpoint123"
 
 }
 
