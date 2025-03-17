@@ -15,9 +15,6 @@ resource "azurerm_subnet" "adme" {
     resource_group_name  = azurerm_resource_group.default.name
     virtual_network_name = azurerm_virtual_network.adme.name
     address_prefixes     = ["10.0.1.0/24"]
-     depends_on = [
-    azurerm_virtual_network.adme
-  ]
 }
 
 resource "random_id" "private_link_service_connection_id" {
@@ -123,4 +120,7 @@ resource "azurerm_resource_group_template_deployment" "default" {
   })
 
   template_content    = file("template.json")
+  depends_on = [
+    azurerm_subnet.adme
+  ]
 }
