@@ -37,6 +37,9 @@ jobs:
       - name: Terraform Plan
         id: plan
         run: terraform plan -destroy -no-color
+      - name: Terraform State
+        id: State
+        run: terraform plan -destroy -no-color
     # On workflow dispatch build or change infrastructure according to Terraform configuration files
       - name: Terraform destroy
         run: terraform destroy -auto-approve
