@@ -67,3 +67,21 @@ variable "adme_vnet_subnet_name" {
 
 }
 
+variable "adme_datapartition_name1" {
+  description = "Name of the data partition"
+  type        = string
+  default     = "dp1"
+  
+}
+
+variable "adme_sku" {
+  description = "The sku of the adme instance"
+  type        = string
+  default     = "Developer"
+
+  validation {
+    condition     = contains(["Developer", "Standard"], var.adme_sku)
+    error_message = "The sku must be either 'Developer' or 'Standard'."
+  }
+  
+}
