@@ -36,7 +36,7 @@ jobs:
     # Run a terraform plan 
       - name: Terraform Plan
         id: plan
-        run: terraform plan -no-color
+        run: terraform plan -destroy -no-color
     # On workflow dispatch build or change infrastructure according to Terraform configuration files
       - name: Terraform destroy
         run: terraform destroy -auto-approve
