@@ -121,6 +121,8 @@ resource "azurerm_resource_group_template_deployment" "default" {
 
   template_content    = file("template.json")
   depends_on = [
-    azurerm_subnet.adme
+    azurerm_subnet.adme,
+    null_resource.delete_private_dns_link_for_energy,
+    null_resource.delete_private_dns_link_for_blob
   ]
 }
