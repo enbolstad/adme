@@ -1,4 +1,4 @@
-resource "null_resource" "delete_private_dns_links" {
+resource "null_resource" "delete_private_dns_link_for_energy" {
   triggers = {
     rg        = azurerm_resource_group.default.name
     zone_name = "privatelink.energy.azure.com"
@@ -22,7 +22,7 @@ resource "null_resource" "delete_private_dns_links" {
   ]
 }
 
-resource "null_resource" "delete_private_dns_links" {
+resource "null_resource" "delete_private_dns_link_for_blob" {
   triggers = {
     rg        = azurerm_resource_group.default.name
     zone_name = "privatelink.blob.core.windows.net"
