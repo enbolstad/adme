@@ -41,7 +41,12 @@ jobs:
         id: State
         run: terraform show
     # On workflow dispatch build or change infrastructure according to Terraform configuration files
-      - name: Terraform destroy dns
-        run: terraform destroy -auto-approve -target=azurerm_private_dns_zone.blob_dns
       - name: Terraform destroy all resources
         run: terraform destroy -auto-approve
+
+      - name: Capture Terraform Error Log
+        if: failure()
+        run: |
+          echo "Terraform destroy failed. Capturing logs..."
+          terraform show -json > terraform-error-log.json
+          cat terraform-error-log.json
