@@ -87,7 +87,7 @@
                             "location": "[parameters('privateEndpoints')[copyIndex()].privateEndpoint.location]",
                             "name": "[parameters('privateEndpoints')[copyIndex()].privateEndpoint.name]",
                             "type": "Microsoft.Network/privateEndpoints",
-                            "apiVersion": "2021-05-01",
+                            "apiVersion": "2024-07-01",
                             "properties": {
                                 "subnet": {
                                     "id": "[parameters('privateEndpoints')[copyIndex()].privateEndpoint.properties.subnet.id]"
