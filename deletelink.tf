@@ -14,12 +14,6 @@ resource "null_resource" "delete_private_dns_link_for_energy" {
       done
     EOT
   }
-
-  depends_on = [
-    azurerm_resource_group.default,
-    azurerm_virtual_network.adme,
-    azurerm_subnet.adme
-  ]
 }
 
 resource "null_resource" "delete_private_dns_link_for_blob" {
@@ -38,10 +32,4 @@ resource "null_resource" "delete_private_dns_link_for_blob" {
       done
     EOT
   }
-
-  depends_on = [
-    azurerm_resource_group.default,
-    azurerm_virtual_network.adme,
-    azurerm_subnet.adme
-  ]
 }
