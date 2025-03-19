@@ -142,7 +142,6 @@ resource "null_resource" "delete_private_dns_link_for_energy" {
       az network private-dns zone delete --name "${self.triggers.zone_name}" --resource-group "${self.triggers.rg}" -y
     EOT
   }
-  depends_on = [azurerm_resource_group_template_deployment.default]
 }
 
 resource "null_resource" "delete_private_dns_link_for_blob" {
@@ -162,5 +161,4 @@ resource "null_resource" "delete_private_dns_link_for_blob" {
       az network private-dns zone delete --name "${self.triggers.zone_name}" --resource-group "${self.triggers.rg}" -y
     EOT
   }
-  depends_on = [azurerm_resource_group_template_deployment.default]
 }
