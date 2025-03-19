@@ -123,48 +123,27 @@ resource "azurerm_resource_group_template_deployment" "default" {
   depends_on = [
     azurerm_subnet.adme,
   ]
-}
-
-resource "null_resource" "delete_private_dns_link_for_energy" {
-  depends_on = [
-    azurerm_resource_group_template_deployment.default
-  ]
-  triggers = {
-    rg        = azurerm_resource_group.default.name
-    zone_name = "privatelink.energy.azure.com"
-  }
-
-  provisioner "local-exec" {
+    provisioner "local-exec" {
     when    = destroy
     command = <<-EOT
-      LINKS=$(az network private-dns link vnet list --resource-group "${self.triggers.rg}" --zone-name "${self.triggers.zone_name}" --query "[].[name]" -o tsv)
+      LINKS=$(az network private-dns link vnet list --resource-group "${var.rg_name}" --zone-name "${self.triggers.zone_name}" --query "[].[name]" -o tsv)
       for link in $LINKS
       do
-        az network private-dns link vnet delete --name $link --resource-group ${self.triggers.rg} --zone-name ${self.triggers.zone_name} -y
+        az network private-dns link vnet delete --name $link --resource-group "${var.rg_name}" --zone-name "privatelink.energy.azure.com" -y
       done
-      az network private-dns zone delete --name "${self.triggers.zone_name}" --resource-group "${self.triggers.rg}" -y
+      az network private-dns zone delete --name "privatelink.energy.azure.com" --resource-group "${var.rg_name}" -y
     EOT
   }
-}
-
-resource "null_resource" "delete_private_dns_link_for_blob" {
-  depends_on = [
-    azurerm_resource_group_template_deployment.default
-  ]
-  triggers = {
-    rg        = azurerm_resource_group.default.name
-    zone_name = "privatelink.blob.core.windows.net"
-  }
-
-  provisioner "local-exec" {
+    provisioner "local-exec" {
     when    = destroy
     command = <<-EOT
-      LINKS=$(az network private-dns link vnet list --resource-group "${self.triggers.rg}" --zone-name "${self.triggers.zone_name}" --query "[].[name]" -o tsv)
+      LINKS=$(az network private-dns link vnet list --resource-group "${var.rg_name}" --zone-name "privatelink.blob.core.windows.net" --query "[].[name]" -o tsv)
       for link in $LINKS
       do
-        az network private-dns link vnet delete --name $link --resource-group ${self.triggers.rg} --zone-name ${self.triggers.zone_name} -y
+        az network private-dns link vnet delete --name $link --resource-group ${var.rg_name} --zone-name "privatelink.blob.core.windows.net" -y
       done
-      az network private-dns zone delete --name "${self.triggers.zone_name}" --resource-group "${self.triggers.rg}" -y
+      az network private-dns zone delete --name "privatelink.blob.core.windows.net" --resource-group "${var.rg_name}" -y
     EOT
   }
+
 }
