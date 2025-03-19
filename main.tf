@@ -123,27 +123,71 @@ resource "azurerm_resource_group_template_deployment" "default" {
   depends_on = [
     azurerm_subnet.adme,
   ]
-    provisioner "local-exec" {
-    when    = destroy
-    command = <<-EOT
-      LINKS=$(az network private-dns link vnet list --resource-group "${var.rg_name}" --zone-name "privatelink.energy.azure.com" --query "[].[name]" -o tsv)
-      for link in $LINKS
-      do
-        az network private-dns link vnet delete --name $link --resource-group "${var.rg_name}" --zone-name "privatelink.energy.azure.com" -y
-      done
-      az network private-dns zone delete --name "privatelink.energy.azure.com" --resource-group "${var.rg_name}" -y
-    EOT
-  }
-    provisioner "local-exec" {
-    when    = destroy
-    command = <<-EOT
-      LINKS=$(az network private-dns link vnet list --resource-group "${var.rg_name}" --zone-name "privatelink.blob.core.windows.net" --query "[].[name]" -o tsv)
-      for link in $LINKS
-      do
-        az network private-dns link vnet delete --name $link --resource-group ${var.rg_name} --zone-name "privatelink.blob.core.windows.net" -y
-      done
-      az network private-dns zone delete --name "privatelink.blob.core.windows.net" --resource-group "${var.rg_name}" -y
-    EOT
+
+}
+
+resource "null_resource" "delete_private_dns_links_energy" {
+  triggers = {
+    rg_name   = var.rg_name
+    zone_name = "privatelink.energy.azure.com"
   }
 
+  provisioner "local-exec" {
+    when    = destroy
+    command = <<-EOT
+      # List all private DNS links for the specified zone
+      LINKS=$(az network private-dns link vnet list --resource-group "${self.triggers.rg_name}" --zone-name "${self.triggers.zone_name}" --query "[].[name]" -o tsv || true)
+      
+      # Check if any links exist and delete them
+      if [ -n "$LINKS" ]; then
+        echo "Found private DNS links: $LINKS"
+        for link in $LINKS
+        do
+          echo "Deleting private DNS link: $link"
+          az network private-dns link vnet delete --name $link --resource-group "${self.triggers.rg_name}" --zone-name "${self.triggers.zone_name}" -y || true
+        done
+      else
+        echo "No private DNS links found for zone: ${self.triggers.zone_name}"
+      fi
+
+      # Delete the private DNS zone
+      echo "Deleting private DNS zone: ${self.triggers.zone_name}"
+      az network private-dns zone delete --name "${self.triggers.zone_name}" --resource-group "${self.triggers.rg_name}" -y || true
+
+      echo "Private DNS zone and links cleanup completed."
+    EOT
+  }
+}
+
+resource "null_resource" "delete_private_dns_links_blob" {
+  triggers = {
+    rg_name   = var.rg_name
+    zone_name = "privatelink.blob.core.windows.net"
+  }
+
+  provisioner "local-exec" {
+    when    = destroy
+    command = <<-EOT
+      # List all private DNS links for the specified zone
+      LINKS=$(az network private-dns link vnet list --resource-group "${self.triggers.rg_name}" --zone-name "${self.triggers.zone_name}" --query "[].[name]" -o tsv || true)
+      
+      # Check if any links exist and delete them
+      if [ -n "$LINKS" ]; then
+        echo "Found private DNS links: $LINKS"
+        for link in $LINKS
+        do
+          echo "Deleting private DNS link: $link"
+          az network private-dns link vnet delete --name $link --resource-group "${self.triggers.rg_name}" --zone-name "${self.triggers.zone_name}" -y || true
+        done
+      else
+        echo "No private DNS links found for zone: ${self.triggers.zone_name}"
+      fi
+
+      # Delete the private DNS zone
+      echo "Deleting private DNS zone: ${self.triggers.zone_name}"
+      az network private-dns zone delete --name "${self.triggers.zone_name}" --resource-group "${self.triggers.rg_name}" -y || true
+
+      echo "Private DNS zone and links cleanup completed."
+    EOT
+  }
 }
