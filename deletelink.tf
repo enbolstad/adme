@@ -12,6 +12,7 @@ resource "null_resource" "delete_private_dns_link_for_energy" {
       do
         az network private-dns link vnet delete --name $link --resource-group ${self.triggers.rg} --zone-name ${self.triggers.zone_name} -y
       done
+      az network private-dns zone delete --name "${self.triggers.zone_name}" --resource-group "${self.triggers.rg}" -y
     EOT
   }
 }
@@ -30,6 +31,7 @@ resource "null_resource" "delete_private_dns_link_for_blob" {
       do
         az network private-dns link vnet delete --name $link --resource-group ${self.triggers.rg} --zone-name ${self.triggers.zone_name} -y
       done
+      az network private-dns zone delete --name "${self.triggers.zone_name}" --resource-group "${self.triggers.rg}" -y
     EOT
   }
 }
