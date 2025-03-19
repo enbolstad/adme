@@ -126,7 +126,7 @@ resource "azurerm_resource_group_template_deployment" "default" {
     provisioner "local-exec" {
     when    = destroy
     command = <<-EOT
-      LINKS=$(az network private-dns link vnet list --resource-group "${var.rg_name}" --zone-name "${self.triggers.zone_name}" --query "[].[name]" -o tsv)
+      LINKS=$(az network private-dns link vnet list --resource-group "${var.rg_name}" --zone-name "privatelink.energy.azure.com" --query "[].[name]" -o tsv)
       for link in $LINKS
       do
         az network private-dns link vnet delete --name $link --resource-group "${var.rg_name}" --zone-name "privatelink.energy.azure.com" -y
