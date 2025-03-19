@@ -130,8 +130,8 @@ resource "null_resource" "delete_private_dns_links_energy" {
   triggers = {
     rg_name   = var.rg_name
     zone_name = "privatelink.energy.azure.com"
-    depends_on = [azurerm_resource_group_template_deployment.default]
   }
+      depends_on = [azurerm_resource_group_template_deployment.default]
 
   provisioner "local-exec" {
     when    = destroy
@@ -164,8 +164,8 @@ resource "null_resource" "delete_private_dns_links_blob" {
   triggers = {
     rg_name   = var.rg_name
     zone_name = "privatelink.blob.core.windows.net"
-    depends_on = [azurerm_resource_group_template_deployment.default]
   }
+      depends_on = [azurerm_resource_group_template_deployment.default]
 
   provisioner "local-exec" {
     when    = destroy
