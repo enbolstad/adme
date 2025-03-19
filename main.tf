@@ -122,12 +122,13 @@ resource "azurerm_resource_group_template_deployment" "default" {
   template_content = file("template.json")
   depends_on = [
     azurerm_subnet.adme,
-    null_resource.delete_private_dns_link_for_energy,
-    null_resource.delete_private_dns_link_for_blob
   ]
 }
 
 resource "null_resource" "delete_private_dns_link_for_energy" {
+  depends_on = [
+    azurerm_resource_group_template_deployment.default
+  ]
   triggers = {
     rg        = azurerm_resource_group.default.name
     zone_name = "privatelink.energy.azure.com"
@@ -147,6 +148,9 @@ resource "null_resource" "delete_private_dns_link_for_energy" {
 }
 
 resource "null_resource" "delete_private_dns_link_for_blob" {
+  depends_on = [
+    azurerm_resource_group_template_deployment.default
+  ]
   triggers = {
     rg        = azurerm_resource_group.default.name
     zone_name = "privatelink.blob.core.windows.net"
