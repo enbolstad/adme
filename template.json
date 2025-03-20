@@ -1,5 +1,5 @@
 {
-    "$schema": "http://schema.management.azure.com/schemas/2014-04-01-preview/deploymentTemplate.json#",
+    "$schema": "https://schema.management.azure.com/schemas/2014-04-01-preview/deploymentTemplate.json#",
     "contentVersion": "1.0.0.0",
     "parameters": {
         "name": {
@@ -87,7 +87,7 @@
                             "location": "[parameters('privateEndpoints')[copyIndex()].privateEndpoint.location]",
                             "name": "[parameters('privateEndpoints')[copyIndex()].privateEndpoint.name]",
                             "type": "Microsoft.Network/privateEndpoints",
-                            "apiVersion": "2024-07-01",
+                            "apiVersion": "2021-05-01",
                             "properties": {
                                 "subnet": {
                                     "id": "[parameters('privateEndpoints')[copyIndex()].privateEndpoint.properties.subnet.id]"
@@ -138,7 +138,7 @@
                                     "resources": [
                                         {
                                             "type": "Microsoft.Network/privateDnsZones",
-                                            "apiVersion": "2024-06-01",
+                                            "apiVersion": "2018-09-01",
                                             "name": "privatelink.energy.azure.com",
                                             "location": "global",
                                             "tags": {},
@@ -162,7 +162,7 @@
                                     "resources": [
                                         {
                                             "type": "Microsoft.Network/privateDnsZones",
-                                            "apiVersion": "2024-06-01",
+                                            "apiVersion": "2018-09-01",
                                             "name": "privatelink.blob.core.windows.net",
                                             "location": "global",
                                             "tags": {},
@@ -208,7 +208,7 @@
                                     "resources": [
                                         {
                                             "type": "Microsoft.Network/privateDnsZones/virtualNetworkLinks",
-                                            "apiVersion": "2024-06-01",
+                                            "apiVersion": "2018-09-01",
                                             "name": "[concat('privatelink.energy.azure.com', '/', uniqueString(parameters('privateEndpoints')[copyIndex()].privateEndpoint.name) )]",
                                             "location": "global",
                                             "properties": {
@@ -236,7 +236,7 @@
                                     "resources": [
                                         {
                                             "type": "Microsoft.Network/privateDnsZones/virtualNetworkLinks",
-                                            "apiVersion": "2024-06-01",
+                                            "apiVersion": "2018-09-01",
                                             "name": "[concat('privatelink.blob.core.windows.net', '/',uniqueString(uniqueString(parameters('privateEndpoints')[copyIndex()].privateEndpoint.name) ))]",
                                             "location": "global",
                                             "properties": {
