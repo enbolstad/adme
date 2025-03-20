@@ -125,8 +125,18 @@ resource "azurerm_resource_group_template_deployment" "default" {
   ]
 
 }
+resource "null_resource" "delete_template_deployment" {
+  depends_on = [azurerm_resource_group_template_deployment.default]
+  
+  provisioner "local-exec" {
+    when    = destroy
+    command = <<EOT
+      az deployment group delete --name "${azurerm_resource_group_template_deployment.default.name}" --resource-group "${azurerm_resource_group.default.name}" || echo "Deployment already deleted."
+    EOT
+  }
+}
 
-resource "null_resource" "delete_private_dns_links_energy" {
+/* resource "null_resource" "delete_private_dns_links_energy" {
   triggers = {
     rg_name   = var.rg_name
     zone_name = "privatelink.energy.azure.com"
@@ -192,4 +202,4 @@ resource "null_resource" "delete_private_dns_links_blob" {
       echo "Private DNS zone and links cleanup completed."
     EOT
   }
-}
+} */
