@@ -125,13 +125,19 @@ resource "azurerm_resource_group_template_deployment" "default" {
   ]
 
 }
+
 resource "null_resource" "delete_template_deployment" {
   depends_on = [azurerm_resource_group_template_deployment.default]
-  
+
+  triggers = {
+    deployment_name = azurerm_resource_group_template_deployment.default.name
+    resource_group  = azurerm_resource_group.default.name
+  }
+
   provisioner "local-exec" {
     when    = destroy
     command = <<EOT
-      az deployment group delete --name "${azurerm_resource_group_template_deployment.default.name}" --resource-group "${azurerm_resource_group.default.name}" || echo "Deployment already deleted."
+      az deployment group delete --name "${self.triggers.deployment_name}" --resource-group "${self.triggers.resource_group}" || echo "Deployment already deleted."
     EOT
   }
 }
