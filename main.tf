@@ -127,6 +127,7 @@ resource "azurerm_resource_group_template_deployment" "default" {
 }
 
 resource "null_resource" "delete_template_resources" {
+  depends_on = [azurerm_resource_group_template_deployment.default]
   triggers = {
     deployment_name                 = azurerm_resource_group_template_deployment.default.name
     resource_group                  = azurerm_resource_group.default.name
