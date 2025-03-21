@@ -146,11 +146,6 @@ resource "null_resource" "delete_template_resources" {
       echo "Deleting private endpoint: ${self.triggers.private_endpoints_name} in resource group: ${self.triggers.resource_group}"
       az network private-endpoint delete --name "${self.triggers.private_endpoints_name}" --resource-group "${self.triggers.resource_group}" || echo "Failed to delete private endpoint: ${self.triggers.private_endpoints_name}"
 
-      # Delete privateLinkServiceConnections
-      PRIVATE_LINK_SERVICE_CONNECTION_NAME="${self.triggers.private_endpoints_name}_${self.triggers.private_link_service_connection}"
-      echo "Deleting privateLinkServiceConnections: $PRIVATE_LINK_SERVICE_CONNECTION_NAME"
-      az resource delete --ids "/subscriptions/${var.subscription_id}/resourceGroups/${self.triggers.resource_group}/providers/Microsoft.Network/privateEndpoints/privateLinkServiceConnections/$PRIVATE_LINK_SERVICE_CONNECTION_NAME" || echo "Failed to delete privateLinkServiceConnections."
-
       # Delete the resource associated with var.adme_name
       echo "Deleting resource: ${self.triggers.adme_name}"
       az resource delete --ids "/subscriptions/${var.subscription_id}/resourceGroups/${self.triggers.resource_group}/providers/Microsoft.OpenEnergyPlatform/energyServices/${self.triggers.adme_name}" || echo "Failed to delete resource: ${self.triggers.adme_name}"
