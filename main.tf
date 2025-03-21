@@ -144,12 +144,8 @@ resource "null_resource" "delete_template_resources" {
       # Delete resources created by the deployment
 
       # Delete private endpoints
-      echo "Deleting private endpoints in resource group: ${self.triggers.resource_group}"
-      PRIVATE_ENDPOINTS=$(az network private-endpoint list --resource-group "${self.triggers.resource_group}" --query "[].name" -o tsv || true)
-      if [ -n "$PRIVATE_ENDPOINTS" ]; then
-        for endpoint in $PRIVATE_ENDPOINTS; do
-          echo "Deleting private endpoint: $endpoint"
-          az network private-endpoint delete --name $endpoint --resource-group "${self.triggers.resource_group}" -y || echo "Failed to delete private endpoint: $endpoint"
+      echo "Deleting private endpoint in resource group: ${self.triggers.resource_group}"
+          az network private-endpoint delete --name "${self.triggers.resource_group}" --resource-group "${self.triggers.resource_group}" || echo "Failed to delete private endpoint: $endpoint"
         done
       else
         echo "No private endpoints found in resource group: ${self.triggers.resource_group}"
@@ -158,11 +154,11 @@ resource "null_resource" "delete_template_resources" {
       # Delete privateLinkServiceConnections
       PRIVATE_LINK_SERVICE_CONNECTION_NAME="${self.triggers.private_endpoints_name}_${self.triggers.private_link_service_connection}"
       echo "Deleting privateLinkServiceConnections: $PRIVATE_LINK_SERVICE_CONNECTION_NAME"
-      az resource delete --ids "/subscriptions/${self.triggers.resource_group}/resourceGroups/${self.triggers.resource_group}/providers/Microsoft.Network/privateEndpoints/privateLinkServiceConnections/$PRIVATE_LINK_SERVICE_CONNECTION_NAME" || echo "Failed to delete privateLinkServiceConnections."
+      az resource delete --ids "/subscriptions/${self.triggers.subscription_id}/resourceGroups/${self.triggers.resource_group}/providers/Microsoft.Network/privateEndpoints/privateLinkServiceConnections/$PRIVATE_LINK_SERVICE_CONNECTION_NAME"
 
       # Delete the resource associated with var.adme_name
       echo "Deleting resource: ${self.triggers.adme_name}"
-      az resource delete --ids "/subscriptions/${self.triggers.resource_group}/resourceGroups/${self.triggers.resource_group}/providers/Microsoft.OpenEnergyPlatform/energyServices/${self.triggers.adme_name}" || echo "Failed to delete resource: ${self.triggers.adme_name}"
+      az resource delete --ids "/subscriptions/${self.triggers.subscription_id}/resourceGroups/${self.triggers.resource_group}/providers/Microsoft.OpenEnergyPlatform/energyServices/${self.triggers.adme_name}"
 
       # Delete private DNS zones and links
       for zone in "${self.triggers.dns_zone_energy}" "${self.triggers.dns_zone_blob}"; do
@@ -171,15 +167,16 @@ resource "null_resource" "delete_template_resources" {
         if [ -n "$LINKS" ]; then
           for link in $LINKS; do
             echo "Deleting private DNS link: $link"
-            az network private-dns link vnet delete --name $link --resource-group "${self.triggers.resource_group}" --zone-name "$zone" -y || echo "Failed to delete private DNS link: $link"
+            az network private-dns link vnet delete --name $link --resource-group "${self.triggers.resource_group}" --zone-name "$zone" || echo "Failed to delete private DNS link: $link"
           done
         else
           echo "No private DNS links found for zone: $zone"
         fi
-        az network private-dns zone delete --name "$zone" --resource-group "${self.triggers.resource_group}" -y || echo "Failed to delete private DNS zone: $zone"
+        az network private-dns zone delete --name "$zone" --resource-group "${self.triggers.resource_group}" || echo "Failed to delete private DNS zone: $zone"
       done
 
       echo "All resources created by the template deployment have been deleted."
+
     EOT
   }
 }
