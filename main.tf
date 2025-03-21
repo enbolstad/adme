@@ -136,6 +136,7 @@ resource "null_resource" "delete_template_resources" {
     private_link_service_connection = random_id.private_link_service_connection_id.hex
     dns_zone_energy                 = "privatelink.energy.azure.com"
     dns_zone_blob                   = "privatelink.blob.core.windows.net"
+    subscription_id                 = var.subscription_id
   }
 
   provisioner "local-exec" {
@@ -148,7 +149,7 @@ resource "null_resource" "delete_template_resources" {
 
       # Delete the resource associated with var.adme_name
       echo "Deleting resource: ${self.triggers.adme_name}"
-      az resource delete --ids "/subscriptions/${var.subscription_id}/resourceGroups/${self.triggers.resource_group}/providers/Microsoft.OpenEnergyPlatform/energyServices/${self.triggers.adme_name}" || echo "Failed to delete resource: ${self.triggers.adme_name}"
+      az resource delete --ids "/subscriptions/${self.subscription_id}/resourceGroups/${self.triggers.resource_group}/providers/Microsoft.OpenEnergyPlatform/energyServices/${self.triggers.adme_name}" || echo "Failed to delete resource: ${self.triggers.adme_name}"
 
       # Delete private DNS zones and links
       for zone in "${self.triggers.dns_zone_energy}" "${self.triggers.dns_zone_blob}"; do
