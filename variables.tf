@@ -1,7 +1,7 @@
 variable "rg_name" {
   description = "The name of the resource group"
   type        = string
-  default     = "rg6"
+  default     = "rg12"
 }
 
 variable "subscription_id" {
@@ -28,7 +28,7 @@ variable "authAppId" {
 variable "adme_name" {
   description = "The name of the adme instance"
   type        = string
-  default     = "testdevtesgghh"
+  default     = "tesadwwhgsyghh"
 
 }
 
@@ -49,7 +49,7 @@ variable "subscription_display_name" {
 variable "Private_Endpoints_name" {
   description = "The display name of the Private Endpoint"
   type        = string
-  default     = "PrivateEndpoint223"
+  default     = "PrivateEndpoint848"
 
 }
 
@@ -71,7 +71,7 @@ variable "adme_datapartition_name1" {
   description = "Name of the data partition"
   type        = string
   default     = "dp1"
-  
+
 }
 
 variable "adme_sku" {
@@ -83,5 +83,5 @@ variable "adme_sku" {
     condition     = contains(["Developer", "Standard"], var.adme_sku)
     error_message = "The sku must be either 'Developer' or 'Standard'."
   }
-  
+
 }
