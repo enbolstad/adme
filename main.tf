@@ -169,7 +169,6 @@ resource "null_resource" "delete_template_resources" {
       echo "Deleting template deployment: ${self.triggers.deployment_name}"
       az deployment group delete --name "${self.triggers.deployment_name}" --resource-group "${self.triggers.resource_group}" || echo "Failed to delete template deployment: ${self.triggers.deployment_name}"
 
-      echo "All resources created by the template deployment have been deleted."
     EOT
   }
 }
