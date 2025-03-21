@@ -151,19 +151,19 @@ resource "null_resource" "delete_template_resources" {
       echo "Deleting resource: ${self.triggers.adme_name}"
       az resource delete --ids "/subscriptions/${self.triggers.subscription_id}/resourceGroups/${self.triggers.resource_group}/providers/Microsoft.OpenEnergyPlatform/energyServices/${self.triggers.adme_name}" || echo "Failed to delete resource: ${self.triggers.adme_name}"
 
-      # Delete private DNS zones and links
+    # Delete private DNS zones and links
       for zone in "${self.triggers.dns_zone_energy}" "${self.triggers.dns_zone_blob}"; do
         echo "Deleting private DNS links and zone: $zone"
         LINKS=$(az network private-dns link vnet list --resource-group "${self.triggers.resource_group}" --zone-name "$zone" --query "[].name" -o tsv || true)
         if [ -n "$LINKS" ]; then
           for link in $LINKS; do
             echo "Deleting private DNS link: $link"
-            az network private-dns link vnet delete --name $link --resource-group "${self.triggers.resource_group}" --zone-name "$zone" || echo "Failed to delete private DNS link: $link"
+            az network private-dns link vnet delete --name $link --resource-group "${self.triggers.resource_group}" --zone-name "$zone" --yes || echo "Failed to delete private DNS link: $link"
           done
         else
           echo "No private DNS links found for zone: $zone"
         fi
-        az network private-dns zone delete --name "$zone" --resource-group "${self.triggers.resource_group}" || echo "Failed to delete private DNS zone: $zone"
+        az network private-dns zone delete --name "$zone" --resource-group "${self.triggers.resource_group}" --yes || echo "Failed to delete private DNS zone: $zone"
       done
 
       # Delete the template deployment
