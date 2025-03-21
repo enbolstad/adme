@@ -149,7 +149,7 @@ resource "null_resource" "delete_template_resources" {
 
       # Delete the resource associated with var.adme_name
       echo "Deleting resource: ${self.triggers.adme_name}"
-      az resource delete --ids "/subscriptions/${self.subscription_id}/resourceGroups/${self.triggers.resource_group}/providers/Microsoft.OpenEnergyPlatform/energyServices/${self.triggers.adme_name}" || echo "Failed to delete resource: ${self.triggers.adme_name}"
+      az resource delete --ids "/subscriptions/${self.triggers.subscription_id}/resourceGroups/${self.triggers.resource_group}/providers/Microsoft.OpenEnergyPlatform/energyServices/${self.triggers.adme_name}" || echo "Failed to delete resource: ${self.triggers.adme_name}"
 
       # Delete private DNS zones and links
       for zone in "${self.triggers.dns_zone_energy}" "${self.triggers.dns_zone_blob}"; do
