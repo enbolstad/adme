@@ -101,6 +101,6 @@ Terraform does not currently support the `Microsoft.OpenEnergyPlatform/energySer
 
 ---
 
-## Example Cleanup Script
+## Cleanup Script
 
 The repository includes a `null_resource` in Terraform that uses Azure CLI commands to clean up resources during destruction. 
