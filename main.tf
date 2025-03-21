@@ -141,24 +141,19 @@ resource "null_resource" "delete_template_resources" {
   provisioner "local-exec" {
     when    = destroy
     command = <<EOT
-      # Delete resources created by the deployment
 
-      # Delete private endpoints
-      echo "Deleting private endpoint in resource group: ${self.triggers.resource_group}"
-          az network private-endpoint delete --name "${self.triggers.resource_group}" --resource-group "${self.triggers.resource_group}" || echo "Failed to delete private endpoint: $endpoint"
-        done
-      else
-        echo "No private endpoints found in resource group: ${self.triggers.resource_group}"
-      fi
+      # Delete the specific private endpoint
+      echo "Deleting private endpoint: ${self.triggers.private_endpoints_name} in resource group: ${self.triggers.resource_group}"
+      az network private-endpoint delete --name "${self.triggers.private_endpoints_name}" --resource-group "${self.triggers.resource_group}" || echo "Failed to delete private endpoint: ${self.triggers.private_endpoints_name}"
 
       # Delete privateLinkServiceConnections
       PRIVATE_LINK_SERVICE_CONNECTION_NAME="${self.triggers.private_endpoints_name}_${self.triggers.private_link_service_connection}"
       echo "Deleting privateLinkServiceConnections: $PRIVATE_LINK_SERVICE_CONNECTION_NAME"
-      az resource delete --ids "/subscriptions/${self.triggers.subscription_id}/resourceGroups/${self.triggers.resource_group}/providers/Microsoft.Network/privateEndpoints/privateLinkServiceConnections/$PRIVATE_LINK_SERVICE_CONNECTION_NAME"
+      az resource delete --ids "/subscriptions/${var.subscription_id}/resourceGroups/${self.triggers.resource_group}/providers/Microsoft.Network/privateEndpoints/privateLinkServiceConnections/$PRIVATE_LINK_SERVICE_CONNECTION_NAME" || echo "Failed to delete privateLinkServiceConnections."
 
       # Delete the resource associated with var.adme_name
       echo "Deleting resource: ${self.triggers.adme_name}"
-      az resource delete --ids "/subscriptions/${self.triggers.subscription_id}/resourceGroups/${self.triggers.resource_group}/providers/Microsoft.OpenEnergyPlatform/energyServices/${self.triggers.adme_name}"
+      az resource delete --ids "/subscriptions/${var.subscription_id}/resourceGroups/${self.triggers.resource_group}/providers/Microsoft.OpenEnergyPlatform/energyServices/${self.triggers.adme_name}" || echo "Failed to delete resource: ${self.triggers.adme_name}"
 
       # Delete private DNS zones and links
       for zone in "${self.triggers.dns_zone_energy}" "${self.triggers.dns_zone_blob}"; do
@@ -175,8 +170,11 @@ resource "null_resource" "delete_template_resources" {
         az network private-dns zone delete --name "$zone" --resource-group "${self.triggers.resource_group}" || echo "Failed to delete private DNS zone: $zone"
       done
 
-      echo "All resources created by the template deployment have been deleted."
+      # Delete the template deployment
+      echo "Deleting template deployment: ${self.triggers.deployment_name}"
+      az deployment group delete --name "${self.triggers.deployment_name}" --resource-group "${self.triggers.resource_group}" || echo "Failed to delete template deployment: ${self.triggers.deployment_name}"
 
+      echo "All resources created by the template deployment have been deleted."
     EOT
   }
 }
