@@ -29,19 +29,29 @@ jobs:
         with:
           terraform_version: 1.6.6
       
-    # Initialize a new or existing Terraform working directory by creating initial files, loading any remote state, downloading modules, etc.
+      # Authenticate Azure CLI
+      - name: Azure CLI Login
+        run: |
+          az login --service-principal \
+            --username $ARM_CLIENT_ID \
+            --password $ARM_CLIENT_SECRET \
+            --tenant $ARM_TENANT_ID
+          az account set --subscription $ARM_SUBSCRIPTION_ID
+      
+      # Initialize a new or existing Terraform working directory by creating initial files, loading any remote state, downloading modules, etc.
       - name: Terraform Init
         id: init
         run: terraform init -backend-config="storage_account_name=$STORAGE_ACCOUNT" -backend-config="container_name=$CONTAINER_NAME" -backend-config="resource_group_name=$RESOURCE_GROUP"
-    # Run a terraform plan 
+      
+      # Run a terraform plan 
       - name: Terraform Plan
         id: plan
         run: terraform plan -destroy -no-color
-      - name: Terraform State
-        id: State
-        run: terraform show
-    # On workflow dispatch build or change infrastructure according to Terraform configuration files
-      - name: Terraform destroy dns
-        run: terraform destroy -auto-approve -target=azurerm_private_dns_zone.blob_dns
+
+      # On workflow dispatch, build or change infrastructure according to Terraform configuration files
+      - name: Terraform destroy adme template resources
+        run: terraform destroy -target=null_resource.adme_template -auto-approve
+        
+      # On workflow dispatch, build or change infrastructure according to Terraform configuration files
       - name: Terraform destroy all resources
         run: terraform destroy -auto-approve
