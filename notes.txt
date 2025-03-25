@@ -1,0 +1,17 @@
+kjør terraform destroy -target null_resource
+så kjør terraform destroy (trenger sikkert ikke oppdatere state siden den kjører når destroy i minne)
+
+slett alle resource som blir laget av deployment. med az cli. 
+
+try to use arm template to delete resource
+
+kjør terraform destroy -target mot null_resource før full destroy
+
+forklar arm-template og terraform
+
+
+code som bli klipt ut fra null_resource:
+# Delete privateLinkServiceConnections
+      PRIVATE_LINK_SERVICE_CONNECTION_NAME="${self.triggers.private_endpoints_name}_${self.triggers.private_link_service_connection}"
+      echo "Deleting privateLinkServiceConnections: $PRIVATE_LINK_SERVICE_CONNECTION_NAME"
+      az resource delete --ids "/subscriptions/${var.subscription_id}/resourceGroups/${self.triggers.resource_group}/providers/Microsoft.Network/privateEndpoints/privateLinkServiceConnections/$PRIVATE_LINK_SERVICE_CONNECTION_NAME" || echo "Failed to delete privateLinkServiceConnections."
