@@ -7,7 +7,6 @@ resource "azurerm_resource_group_template_deployment" "default" {
   name                = var.adme_name
   resource_group_name = azurerm_resource_group.default.name
   deployment_mode     = "Incremental"
-  template_content = file("template.json")
   parameters_content = jsonencode({
     "name" = {
     value = "${var.adme_name}" }
@@ -41,7 +40,12 @@ resource "azurerm_resource_group_template_deployment" "default" {
     }
     "publicNetworkAccess" = {
     value = true }
+    "privateEndpoints" = {
+      value = []
+    }
     "resourceGroupId" = {
     value = "/subscriptions/${var.subscription_id}/resourceGroups/${var.rg_name}" }
   })
+
+  template_content = file("template.json")
 }
