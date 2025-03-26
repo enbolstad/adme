@@ -1,7 +1,7 @@
 variable "rg_name" {
   description = "The name of the resource group"
   type        = string
-  default     = "rg14"
+  default     = "rg15"
 }
 
 variable "subscription_id" {
@@ -28,7 +28,7 @@ variable "authAppId" {
 variable "adme_name" {
   description = "The name of the adme instance"
   type        = string
-  default     = "tesbdwwhgsyghh"
+  default     = "txsbdwwhgsyghx"
 
 }
 
