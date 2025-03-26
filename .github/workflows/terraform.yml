@@ -33,10 +33,6 @@ jobs:
       - name: Terraform Init
         id: init
         run: terraform init -backend-config="storage_account_name=$STORAGE_ACCOUNT" -backend-config="container_name=$CONTAINER_NAME" -backend-config="resource_group_name=$RESOURCE_GROUP"
-    # Run a terraform plan 
-      - name: Terraform Plan
-        id: plan
-        run: terraform plan -no-color
     # On workflow dispatch build or change infrastructure according to Terraform configuration files
       - name: Terraform Apply
         run: terraform apply -auto-approve
