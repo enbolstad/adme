@@ -56,12 +56,7 @@ resource "azurerm_resource_group_template_deployment" "default" {
   template_content = file("template.json")
 }
 
-#Storage and workspace for logs
-resource "random_string" "resource_code" {
-  length  = 5
-  special = false
-  upper   = false
-}
+#Storage and workspace for osdu service logs
 
 resource "azurerm_storage_account" "adme_log" {
   name                     = "99akerbpadmepwe01"
