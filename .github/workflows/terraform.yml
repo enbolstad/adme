@@ -29,10 +29,35 @@ jobs:
         with:
           terraform_version: 1.6.6
       
-    # Initialize a new or existing Terraform working directory by creating initial files, loading any remote state, downloading modules, etc.
+      # Initialize a new or existing Terraform working directory by creating initial files, loading any remote state, downloading modules, etc.
       - name: Terraform Init
         id: init
         run: terraform init -backend-config="storage_account_name=$STORAGE_ACCOUNT" -backend-config="container_name=$CONTAINER_NAME" -backend-config="resource_group_name=$RESOURCE_GROUP"
-    # On workflow dispatch build or change infrastructure according to Terraform configuration files
+      
+      # Run a terraform plan and save the output to a file
+      - name: Terraform Plan
+        id: plan
+        run: terraform plan -out=tfplan -no-color
+      
+      # Upload the plan file as an artifact (optional, for debugging or later use)
+      - name: Upload Terraform Plan
+        uses: actions/upload-artifact@v3
+        with:
+          name: terraform-plan
+          path: tfplan
+
+  manual_approval:
+    name: 'Manual Approval'
+    needs: terraform
+    runs-on: ubuntu-latest
+    steps:
+      - name: Await Manual Approval
+        run: echo "Please review the Terraform plan and approve the workflow to proceed."
+
+  terraform_apply:
+    name: 'Terraform Apply'
+    needs: manual_approval
+    runs-on: ubuntu-latest
+    steps:
       - name: Terraform Apply
-        run: terraform apply -auto-approve
+        run: terraform apply tfplan
