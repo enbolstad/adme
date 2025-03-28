@@ -75,7 +75,7 @@ resource "azurerm_log_analytics_workspace" "osdu_service_logs" {
 }
 
 resource "azurerm_storage_container" "osdu_service_logs" {
-  name                  = "OsduServiceLogs"
+  name                  = "osduservicelogs"
   storage_account_id    = azurerm_storage_account.adme_log.id
   container_access_type = "private"
 }
