@@ -4,6 +4,12 @@ variable "rg_name" {
   default     = "rg17"
 }
 
+variable "rg_name_osdu_service_log" {
+  description = "The name of the resource group"
+  type        = string
+  default     = "rg-msa-adme-mon-prod-we-001"
+}
+
 variable "subscription_id" {
   description = "The subscription id"
   type        = string

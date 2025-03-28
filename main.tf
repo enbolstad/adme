@@ -3,6 +3,12 @@ resource "azurerm_resource_group" "default" {
   location = var.location
 }
 
+resource "azurerm_resource_group" "osdu_service_log" {
+  name     = var.rg_name_osdu_service_log
+  location = var.location
+}
+
+
 resource "azurerm_resource_group_template_deployment" "default" {
   name                = var.adme_name
   resource_group_name = azurerm_resource_group.default.name
@@ -48,4 +54,33 @@ resource "azurerm_resource_group_template_deployment" "default" {
   })
 
   template_content = file("template.json")
+}
+
+#Storage and workspace for logs
+resource "random_string" "resource_code" {
+  length  = 5
+  special = false
+  upper   = false
+}
+
+resource "azurerm_storage_account" "adme_log" {
+  name                     = "99akerbpadmepwe01"
+  resource_group_name      = azurerm_resource_group.osdu_service_log.name
+  location                 = var.location
+  account_tier             = "Standard"
+  account_replication_type = "GRS"
+}
+
+resource "azurerm_log_analytics_workspace" "osdu_service_logs" {
+  name                = "ADME_log${random_string.random.id}"
+  location            = var.location
+  resource_group_name = azurerm_resource_group.osdu_service_log.name
+  sku                 = "PerGB2018"
+  retention_in_days   = 30
+}
+
+resource "azurerm_storage_container" "osdu_service_logs" {
+  name                  = "OsduServiceLogs"
+  storage_account_id    = azurerm_storage_account.adme_log.id
+  container_access_type = "private"
 }
