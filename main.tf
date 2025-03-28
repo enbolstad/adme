@@ -67,7 +67,7 @@ resource "azurerm_storage_account" "adme_log" {
 }
 
 resource "azurerm_log_analytics_workspace" "osdu_service_logs" {
-  name                = "ADME_log${random_string.random.id}"
+  name                = "ws-msa-adme-mon-prod-we-999"
   location            = var.location
   resource_group_name = azurerm_resource_group.osdu_service_log.name
   sku                 = "PerGB2018"
