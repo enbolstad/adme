@@ -46,18 +46,11 @@ jobs:
           name: terraform-plan
           path: tfplan
 
-  manual_approval:
-    name: 'Manual Approval'
-    needs: terraform
-    runs-on: ubuntu-latest
-    steps:
-      - name: Await Manual Approval
-        run: echo "Please review the Terraform plan and approve the workflow to proceed."
-
   terraform_apply:
     name: 'Terraform Apply'
-    needs: manual_approval
+    needs: terraform
     runs-on: ubuntu-latest
+    environment: Production # Requires manual approval in the environment
     steps:
       # Checkout the repository again to ensure the plan file is available
       - name: Checkout
