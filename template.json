@@ -3,47 +3,47 @@
     "contentVersion": "1.0.0.0",
     "parameters": {
         "name": {
-            "type": "string"
+            "type": "String"
         },
         "location": {
-            "type": "string"
+            "type": "String"
         },
         "tagsByResource": {
-            "type": "object"
+            "type": "Object"
         },
         "authAppId": {
-            "type": "string"
+            "type": "String"
         },
         "dataPartitionNames": {
-            "type": "array"
+            "type": "Array"
         },
         "cmkEnabled": {
-            "type": "bool"
+            "type": "Bool"
         },
         "encryption": {
-            "type": "object"
+            "type": "Object"
         },
         "identity": {
-            "type": "object"
+            "type": "Object"
         },
         "corsRules": {
-            "type": "array"
+            "type": "Array"
         },
         "sku": {
-            "type": "object"
+            "type": "Object"
         },
         "publicNetworkAccess": {
             "defaultValue": true,
-            "type": "bool"
+            "type": "Bool"
         },
         "privateEndpoints": {
-            "type": "array",
+            "type": "Array",
             "metadata": {
                 "description": "Private endpoints. Empty if no private network access selected."
             }
         },
         "resourceGroupId": {
-            "type": "string"
+            "type": "String"
         }
     },
     "resources": [
