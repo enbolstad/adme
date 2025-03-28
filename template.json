@@ -12,7 +12,7 @@
             "type": "Object"
         },
         "authAppId": {
-            "type": "String"
+            "type": "string"
         },
         "dataPartitionNames": {
             "type": "Array"
